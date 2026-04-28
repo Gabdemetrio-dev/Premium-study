@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Study</title>
+    <style>
+        :root {
+            --bg-color: #2b241b;
+            --text-color: #f0e6d2;
+            --accent: #e6b84f;
+            --card-bg: rgba(50, 40, 30, 0.7);
+            --input-bg: rgba(20, 18, 15, 0.8);
+            --border: rgba(200, 160, 80, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background 3s ease, color 0.5s ease; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: #1f1a14; color: var(--text-color);
+            position: relative; overflow-x: hidden;
+        }
+        .circadian-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.35; transition: background 3s ease;
+            background: linear-gradient(135deg, #3a2e1f, #4a3a28, #2b241b);
+        }
+        .container {
+            background: rgba(30, 25, 20, 0.85); backdrop-filter: blur(25px);
+            border-radius: 28px; padding: 2.2rem; width: 90%; max-width: 850px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--border);
+        }
+        h1 {
+            text-align: center; font-size: 2.6rem; margin-bottom: 0.2rem;
+            background: linear-gradient(135deg, #e6b84f, #f5d78c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 700; letter-spacing: -0.5px;
+        }
+        .subtitle {
+            text-align: center; font-size: 0.9rem; color: #c9a44b;
+            margin-bottom: 2rem; opacity: 0.9;
+        }
+        .config-panel {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.2rem; margin-bottom: 2rem;
+        }
+        .config-group {
+            background: var(--card-bg); padding: 1rem; border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        .config-group label {
+            display: block; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 1.5px; opacity: 0.7; margin-bottom: 0.5rem;
+            color: #d4b87a; font-weight: 600;
+        }
+        .config-group input, .config-group select {
+            width: 100%; padding: 0.65rem; background: var(--input-bg);
+            border: 1px solid var(--border); border-radius: 10px;
+            color: #f0e6d2; font-size: 0.95rem; outline: none;
+        }
+        .config-group input:focus, .config-group select:focus {
+            border-color: #d4a030; box-shadow: 0 0 12px rgba(200,150,40,0.2);
+        }
+        .button-row {
+            display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap;
+        }
+        button {
+            padding: 0.9rem 2rem; border: none; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; letter-spacing: 1px;
+            text-transform: uppercase; transition: all 0.3s ease;
+            background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+            color: #f0e6d2;
+        }
+        button:hover {
+            transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            background: rgba(255,255,255,0.15);
+        }
+        button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-start { background: linear-gradient(135deg, #c9952e, #e6b84f); color: #1f1a14; border: none; }
+        .btn-pause { background: linear-gradient(135deg, #d4880f, #b07008); border: none; }
+        .btn-update { background: rgba(200,160,60,0.2); }
+        .circadian-phase-indicator {
+            text-align: center; margin: 1rem 0 1.5rem; padding: 0.8rem;
+            background: rgba(40,35,28,0.7); border-radius: 20px; border: 1px solid var(--border);
+        }
+        .phase-emoji { font-size: 2rem; display: block; margin-bottom: 0.2rem; }
+        .phase-name { font-weight: 700; font-size: 1.1rem; color: #e6b84f; }
+        .phase-desc { font-size: 0.8rem; opacity: 0.7; margin-top: 0.2rem; }
+        .weather-badge {
+            display: inline-block; background: rgba(200,160,60,0.15);
+            padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem;
+            color: #e6b84f; margin: 0.5rem auto;
+        }
+        .timer-display { text-align: center; margin: 2rem 0; }
+        .phase-indicator {
+            font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 0.8rem; opacity: 0.8; font-weight: 600; color: #d4b87a;
+        }
+        .time {
+            font-size: 6.5rem; font-weight: 300; letter-spacing: -3px;
+            line-height: 1; color: #f0e6d2;
+        }
+        .time span { font-size: 2rem; opacity: 0.4; }
+        .cycle-info { margin-top: 0.8rem; font-size: 0.85rem; opacity: 0.7; }
+        .progress-bar {
+            width: 100%; height: 6px; background: rgba(200,170,100,0.2);
+            border-radius: 3px; margin: 1rem 0; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #d4a030, #e6c84f);
+            border-radius: 3px; transition: width 1s linear; width: 0%;
+        }
+        .analytics-panel {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.8rem; margin-top: 2rem;
+        }
+        .metric {
+            background: var(--card-bg); padding: 0.9rem; border-radius: 12px;
+            text-align: center; border: 1px solid var(--border);
+        }
+        .metric-value {
+            font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, #e6b84f, #f5d78c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .metric-label {
+            font-size: 0.7rem; opacity: 0.6; text-transform: uppercase;
+            letter-spacing: 1.5px; margin-top: 0.3rem; color: #d4b87a;
+        }
+        .schedule-panel {
+            margin-top: 2rem; background: var(--card-bg); padding: 1.5rem;
+            border-radius: 16px; border: 1px solid var(--border);
+        }
+        .schedule-panel h3 { margin-bottom: 1rem; color: #e6b84f; }
+        .schedule-item {
+            padding: 0.5rem 0; border-bottom: 1px solid rgba(200,170,100,0.2);
+            display: flex; justify-content: space-between; font-size: 0.85rem;
+        }
+        #factorDebug {
+            display: block; text-align: center; font-size: 0.7rem; opacity: 0.7;
+            word-break: break-word; margin: 0.3rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="circadian-bg" id="circadianBg"></div>
+    <div class="container">
+        <h1>Premium Study</h1>
+        <p class="subtitle">AROPA 2.1: Algoritmo de Ritmo Ótimo de Pausa Adaptativa — precisão circadiana e meteorológica</p>
+        <div class="circadian-phase-indicator" id="circadianPhaseIndicator">
+            <span class="phase-emoji" id="phaseEmoji">🌅</span>
+            <span class="phase-name" id="phaseName">Amanhecer</span>
+            <div class="phase-desc" id="phaseDesc">Cortisol subindo - preparando para o foco</div>
+        </div>
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <span class="weather-badge" id="weatherBadge">🔄 Obtendo dados climáticos...</span>
+        </div>
+        <div id="factorDebug"></div>
+        <div class="config-panel">
+            <div class="config-group">
+                <label>⏰ Tempo Total (horas)</label>
+                <input type="number" id="totalHours" value="2" min="0.1" max="12" step="0.1">
+            </div>
+            <div class="config-group">
+                <label>📚 Dificuldade (1-5)</label>
+                <input type="number" id="difficulty" value="3" min="1" max="5">
+            </div>
+            <div class="config-group">
+                <label>📍 Cidade (para clima)</label>
+                <input type="text" id="city" value="Sao Paulo" placeholder="Ex: Rio de Janeiro">
+            </div>
+        </div>
+        <div class="button-row">
+            <button class="btn-update" onclick="forceUpdate()">🔄 Atualizar Informações</button>
+            <button class="btn-start" id="btnStart" onclick="startTimer()">▶ Iniciar</button>
+            <button class="btn-pause" id="btnPause" onclick="pauseTimer()" disabled>⏸️ Pausar</button>
+            <button class="btn-reset" id="btnReset" onclick="resetTimer()">↺ Reiniciar</button>
+        </div>
+        <div class="timer-display">
+            <div class="phase-indicator" id="phaseIndicator">PRONTO PARA COMEÇAR</div>
+            <div class="time" id="timerDisplay">00<span>:</span>00</div>
+            <div class="cycle-info" id="cycleInfo">Ciclo 0/0</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        <div class="analytics-panel">
+            <div class="metric"><div class="metric-value" id="efficiency">--</div><div class="metric-label">Eficiência Total</div></div>
+            <div class="metric"><div class="metric-value" id="focusTime">--</div><div class="metric-label">Foco Efetivo</div></div>
+            <div class="metric"><div class="metric-value" id="pauseTime">--</div><div class="metric-label">Pausa Ideal</div></div>
+            <div class="metric"><div class="metric-value" id="totalCycles">--</div><div class="metric-label">Total Ciclos</div></div>
+        </div>
+        <div class="schedule-panel">
+            <h3>📋 Cronograma Calculado</h3>
+            <div id="scheduleContent"><p style="opacity:0.5;">Configure os parâmetros e veja as métricas reagirem</p></div>
+        </div>
+    </div>
+    <script>
+        const API_KEY = '7f3ea8c5a2144008b15215119262704';
+        const BASE_URL = 'https://api.weatherapi.com/v1';
+        let realWeatherData = { temperature: 23, humidity: 60, uv: 3, condition: 'Clear', pressure: 1013, wind_kph: 10 };
+        async function fetchWeatherData(city) {
+            try {
+                const url = BASE_URL+'/current.json?key='+API_KEY+'&q='+encodeURIComponent(city)+'&aqi=no';
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('HTTP '+response.status);
+                const data = await response.json();
+                realWeatherData = {
+                    temperature: data.current.temp_c,
+                    humidity: data.current.humidity,
+                    uv: data.current.uv,
+                    condition: mapCondition(data.current.condition.text),
+                    pressure: data.current.pressure_mb,
+                    wind_kph: data.current.wind_kph
+                };
+                updateWeatherBadge(data.current.condition.text, data.current.temp_c);
+                updateMetricsDisplay();
+                return realWeatherData;
+            } catch (error) {
+                console.error('Erro API clima:', error);
+                document.getElementById('weatherBadge').innerHTML = '⚠️ Erro ao obter clima';
+                return null;
+            }
+        }
+        function mapCondition(text) {
+            const t = text.toLowerCase();
+            if (t.includes('sunny') || t.includes('clear')) return 'Clear';
+            if (t.includes('cloudy') || t.includes('overcast')) return 'Cloudy';
+            if (t.includes('rain') || t.includes('drizzle')) return 'Rain';
+            if (t.includes('storm') || t.includes('thunder')) return 'Storm';
+            return 'Cloudy';
+        }
+        function updateWeatherBadge(desc, temp) {
+            const emoji = { Clear: '☀️', Cloudy: '☁️', Rain: '🌧️', Storm: '⛈️' }[realWeatherData.condition] || '🌤️';
+            document.getElementById('weatherBadge').innerHTML = emoji+' '+desc+' | '+temp+'°C | UV '+realWeatherData.uv+' | 💧 '+realWeatherData.humidity+'% | 🌬️ '+realWeatherData.wind_kph+' km/h';
+        }
+        function getClimateEfficiency(weather) { return { Clear: 1.2, Cloudy: 0.90, Rain: 0.80, Storm: 0.70 }[weather] || 1.0; }
+        function getHourEfficiency(hour) {
+            if (hour >= 5 && hour < 7) return 0.90;
+            if (hour >= 7 && hour < 10) return 1.15;
+            if (hour >= 10 && hour < 13) return 1.0;
+            if (hour >= 13 && hour < 15) return 0.75;
+            if (hour >= 15 && hour < 18) return 0.98;
+            if (hour >= 18 && hour < 21) return 0.88;
+            return 0.72;
+        }
+        function getHumidityFactor(h) { const diff = (h - 50) / 40; return 1.0 - 0.25 * diff * diff; }
+        function getUVFactor(uv) { return 0.80 + 0.25 * Math.tanh((uv - 1.0) / 2.5); }
+        function getTemperatureFactor(temp) {
+            const diff = (temp - 22) / 8;
+            const base = Math.exp(-diff * diff);
+            const heatPenalty = 1.0 - 0.05 * Math.max(0, temp - 28);
+            const coldPenalty = 1.0 - 0.03 * Math.max(0, 14 - temp);
+            return base * heatPenalty * coldPenalty;
+        }
+        function getWindFactor(windKph) { if (windKph < 5) return 0.90; if (windKph <= 15) return 1.05; return 0.95; }
+        function getCO2Factor(humidity, weather) {
+            let co2 = 500;
+            if (weather === 'Rain' || weather === 'Storm') co2 += 250;
+            if (humidity > 70) co2 += 150;
+            return 1.0 / (1.0 + Math.pow((co2 - 400) / 2000, 3));
+        }
+        function getBaseFocus(difficulty) { return Math.round(50 * Math.exp(-0.30 * (difficulty - 1))); }
+        function calculateTotalEfficiency() {
+            const now = new Date();
+            const hour = now.getHours() + now.getMinutes() / 60;
+            const E_climate = getClimateEfficiency(realWeatherData.condition);
+            const E_hour = getHourEfficiency(hour);
+            const F_humidity = getHumidityFactor(realWeatherData.humidity);
+            const F_uv = getUVFactor(realWeatherData.uv);
+            const F_temp = getTemperatureFactor(realWeatherData.temperature);
+            const F_wind = getWindFactor(realWeatherData.wind_kph);
+            const F_co2 = getCO2Factor(realWeatherData.humidity, realWeatherData.condition);
+            const total = E_climate * E_hour * F_humidity * F_uv * F_temp * F_wind * F_co2;
+            document.getElementById('factorDebug').textContent = 'Clima:'+E_climate.toFixed(2)+' Hora:'+E_hour.toFixed(2)+' Umidade:'+F_humidity.toFixed(2)+' UV:'+F_uv.toFixed(2)+' Temp:'+F_temp.toFixed(2)+' Vento:'+F_wind.toFixed(2)+' CO2:'+F_co2.toFixed(2);
+            return { total: total * 100, decimal: total };
+        }
+        function getEffectiveFocus(baseFocus, efficiencyDecimal) { return Math.max(12, Math.round(baseFocus * efficiencyDecimal)); }
+        function getPauseDuration(effectiveFocus) {
+            if (effectiveFocus <= 15) return 4;
+            return Math.round(4 + 1.8 * Math.sqrt(effectiveFocus - 14));
+        }
+        function updateMetricsDisplay() {
+            const totalHours = parseFloat(document.getElementById('totalHours').value) || 2;
+            const totalMinutes = totalHours * 60;
+            const difficulty = parseInt(document.getElementById('difficulty').value) || 3;
+            const efficiency = calculateTotalEfficiency();
+            const baseFocus = getBaseFocus(difficulty);
+            let effectiveFocus = getEffectiveFocus(baseFocus, efficiency.decimal);
+            if (totalMinutes < effectiveFocus) effectiveFocus = Math.max(1, Math.floor(totalMinutes));
+            let pauseDuration = (totalMinutes <= effectiveFocus) ? 0 : getPauseDuration(effectiveFocus);
+            document.getElementById('efficiency').textContent = Math.round(efficiency.total) + '%';
+            document.getElementById('focusTime').textContent = effectiveFocus + ' min';
+            document.getElementById('pauseTime').textContent = pauseDuration + ' min';
+            document.getElementById('totalCycles').textContent = '--';
+        }
+        document.querySelectorAll('#difficulty, #totalHours, #city').forEach(el => el.addEventListener('input', updateMetricsDisplay));
+        document.getElementById('city').addEventListener('change', async () => {
+            document.getElementById('weatherBadge').innerHTML = '🔄 Atualizando...';
+            await fetchWeatherData(document.getElementById('city').value);
+            updateMetricsDisplay();
+        });
+
+        let timerInterval, currentPlan, isRunning = false, currentPhaseIndex = 0, secondsRemaining = 0, isPaused = false;
+        function updateTimerDisplay() {
+            const mins = Math.floor(secondsRemaining / 60);
+            const secs = secondsRemaining % 60;
+            document.getElementById('timerDisplay').innerHTML = String(mins).padStart(2,'0')+'<span>:</span>'+String(secs).padStart(2,'0');
+            if (currentPlan && currentPhaseIndex < currentPlan.schedule.length) {
+                const phase = currentPlan.schedule[currentPhaseIndex];
+                const total = phase.duration * 60;
+                const progress = total > 0 ? ((total - secondsRemaining) / total) * 100 : 0;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+        }
+        function updatePhaseDisplay() {
+            if (!currentPlan || currentPhaseIndex >= currentPlan.schedule.length) {
+                document.getElementById('phaseIndicator').textContent = 'CONCLUÍDO! 🎉';
+                document.getElementById('cycleInfo').textContent = 'Estudo finalizado';
+                return;
+            }
+            const phase = currentPlan.schedule[currentPhaseIndex];
+            document.getElementById('phaseIndicator').textContent = phase.type === 'Foco' ? '🧠 EM FOCO' : phase.type === 'Pausa Longa' ? '🍎 PAUSA LONGA' : '☕ PAUSA';
+            document.getElementById('cycleInfo').textContent = 'Ciclo '+phase.cycle+'/'+currentPlan.totalCycles+' | '+phase.type;
+        }
+        function loadNextPhase() {
+            currentPhaseIndex++;
+            if (currentPhaseIndex >= currentPlan.schedule.length) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                document.getElementById('btnStart').disabled = true;
+                document.getElementById('btnPause').disabled = true;
+                updatePhaseDisplay();
+                document.getElementById('timerDisplay').innerHTML = '00<span>:</span>00';
+                document.getElementById('progressFill').style.width = '100%';
+                return;
+            }
+            const phase = currentPlan.schedule[currentPhaseIndex];
+            secondsRemaining = phase.duration * 60;
+            updatePhaseDisplay();
+            updateTimerDisplay();
+        }
+        function generateSchedule(totalMinutes, difficulty, efficiencyDecimal) {
+            const baseFocus = getBaseFocus(difficulty);
+            let effectiveFocus = getEffectiveFocus(baseFocus, efficiencyDecimal);
+            if (totalMinutes < effectiveFocus) effectiveFocus = Math.max(1, Math.floor(totalMinutes));
+            const pauseDuration = (totalMinutes <= effectiveFocus) ? 0 : getPauseDuration(effectiveFocus);
+            let schedule = [], remaining = totalMinutes, currentTime = new Date(), cycleCount = 0;
+            while (remaining > 0.5) {
+                if (remaining < effectiveFocus) {
+                    schedule.push({ type: 'Foco', duration: Math.ceil(remaining), time: new Date(currentTime), cycle: cycleCount + 1 });
+                    break;
+                }
+                schedule.push({ type: 'Foco', duration: effectiveFocus, time: new Date(currentTime), cycle: cycleCount + 1 });
+                currentTime.setMinutes(currentTime.getMinutes() + effectiveFocus);
+                remaining -= effectiveFocus;
+                if ((cycleCount + 1) % 4 === 0 && remaining > 2 && pauseDuration > 0) {
+                    schedule.push({ type: 'Pausa Longa', duration: 20, time: new Date(currentTime), cycle: cycleCount + 1 });
+                    currentTime.setMinutes(currentTime.getMinutes() + 20);
+                } else if (remaining > 2 && pauseDuration > 0) {
+                    schedule.push({ type: 'Pausa', duration: pauseDuration, time: new Date(currentTime), cycle: cycleCount + 1 });
+                    currentTime.setMinutes(currentTime.getMinutes() + pauseDuration);
+                }
+                cycleCount++;
+            }
+            return { schedule, effectiveFocus, pauseDuration, totalCycles: schedule.filter(p => p.type === 'Foco').length };
+        }
+        function renderSchedule(sched) {
+            const content = document.getElementById('scheduleContent');
+            let html = '';
+            sched.forEach(item => {
+                const timeStr = item.time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const icon = item.type === 'Foco' ? '🧠' : item.type === 'Pausa Longa' ? '🍎' : '☕';
+                html += '<div class="schedule-item"><span>'+icon+' '+timeStr+' - '+item.type+'</span><span>'+item.duration+' min</span></div>';
+            });
+            content.innerHTML = html || '<p style="opacity:0.5;">Aguardando configuração</p>';
+        }
+        async function startTimer() {
+            clearInterval(timerInterval);
+            isRunning = false; isPaused = false; currentPlan = null; currentPhaseIndex = 0; secondsRemaining = 0;
+            const city = document.getElementById('city').value || 'Sao Paulo';
+            document.getElementById('weatherBadge').innerHTML = '🔄 Atualizando clima...';
+            await fetchWeatherData(city);
+            updateMetricsDisplay();
+            const totalHours = parseFloat(document.getElementById('totalHours').value);
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            const efficiency = calculateTotalEfficiency();
+            currentPlan = generateSchedule(totalHours * 60, difficulty, efficiency.decimal);
+            currentPhaseIndex = 0;
+            secondsRemaining = currentPlan.schedule[0].duration * 60;
+            document.getElementById('efficiency').textContent = Math.round(efficiency.total) + '%';
+            document.getElementById('focusTime').textContent = currentPlan.effectiveFocus + ' min';
+            document.getElementById('pauseTime').textContent = currentPlan.pauseDuration + ' min';
+            document.getElementById('totalCycles').textContent = currentPlan.totalCycles;
+            renderSchedule(currentPlan.schedule);
+            updatePhaseDisplay();
+            updateTimerDisplay();
+            isRunning = true;
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('btnPause').disabled = false;
+            runTimer();
+        }
+        function runTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (secondsRemaining > 0) { secondsRemaining--; updateTimerDisplay(); }
+                else { loadNextPhase(); if (!isRunning) clearInterval(timerInterval); }
+            }, 1000);
+        }
+        function pauseTimer() {
+            if (!isRunning) return;
+            isPaused = true; isRunning = false; clearInterval(timerInterval);
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnPause').disabled = true;
+            document.getElementById('btnStart').textContent = '▶ Retomar';
+            document.getElementById('phaseIndicator').textContent = '⏸️ PAUSADO';
+        }
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false; isPaused = false; currentPlan = null; currentPhaseIndex = 0; secondsRemaining = 0;
+            document.getElementById('timerDisplay').innerHTML = '00<span>:</span>00';
+            document.getElementById('phaseIndicator').textContent = 'PRONTO PARA COMEÇAR';
+            document.getElementById('cycleInfo').textContent = 'Ciclo 0/0';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnPause').disabled = true;
+            document.getElementById('btnStart').textContent = '▶ Iniciar';
+            updateMetricsDisplay();
+            document.getElementById('totalCycles').textContent = '--';
+            document.getElementById('scheduleContent').innerHTML = '<p style="opacity:0.5;">Configure os parâmetros e veja as métricas reagirem</p>';
+        }
+        async function forceUpdate() {
+            const city = document.getElementById('city').value || 'Sao Paulo';
+            document.getElementById('weatherBadge').innerHTML = '🔄 Atualizando...';
+            await fetchWeatherData(city);
+            updateMetricsDisplay();
+            const totalHours = parseFloat(document.getElementById('totalHours').value);
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            const efficiency = calculateTotalEfficiency();
+            const plan = generateSchedule(totalHours * 60, difficulty, efficiency.decimal);
+            document.getElementById('totalCycles').textContent = plan.totalCycles;
+            renderSchedule(plan.schedule);
+        }
+        function getCircadianPhase(hour) {
+            if (hour >= 5 && hour < 7) return { name: 'Amanhecer', emoji: '🌅', desc: 'Cortisol subindo', colors: ['#5a4a35','#4a3a28','#3d2c1c'] };
+            if (hour >= 7 && hour < 10) return { name: 'Manhã - Pico de Foco', emoji: '☀️', desc: 'Máximo alerta', colors: ['#6b5a45','#5a4a35','#4a3a28'] };
+            if (hour >= 10 && hour < 13) return { name: 'Dia - Foco Sustentado', emoji: '🌤️', desc: 'Boa energia', colors: ['#7d6b55','#6b5a45','#5a4a35'] };
+            if (hour >= 13 && hour < 15) return { name: 'Tarde - Vale Pós-Almoço', emoji: '😴', desc: 'Queda de energia', colors: ['#5a4a35','#4a3a28','#3d2c1c'] };
+            if (hour >= 15 && hour < 18) return { name: 'Tarde - Segundo Pico', emoji: '🌅', desc: 'Atenção renovada', colors: ['#6b5a45','#5a4a35','#4a3a28'] };
+            if (hour >= 18 && hour < 21) return { name: 'Anoitecer', emoji: '🌆', desc: 'Declínio leve', colors: ['#3d2c1c','#2b241b','#1f1a14'] };
+            return { name: 'Noite Tranquila', emoji: '🌙', desc: 'Modo descanso', colors: ['#1f1a14','#181410','#0f0c09'] };
+        }
+        function updateCircadianBackground() {
+            const now = new Date();
+            const hour = now.getHours() + now.getMinutes() / 60;
+            const phase = getCircadianPhase(hour);
+            document.getElementById('circadianBg').style.background = 'linear-gradient(135deg, '+phase.colors[0]+', '+phase.colors[1]+', '+phase.colors[2]+')';
+            document.getElementById('phaseEmoji').textContent = phase.emoji;
+            document.getElementById('phaseName').textContent = phase.name;
+            document.getElementById('phaseDesc').textContent = phase.desc;
+        }
+        async function initialize() {
+            updateCircadianBackground();
+            await fetchWeatherData(document.getElementById('city').value || 'Sao Paulo');
+            updateMetricsDisplay();
+        }
+        setInterval(updateCircadianBackground, 60000);
+        initialize();
+    </script>
+</body>
+</html>
